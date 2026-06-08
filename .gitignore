@@ -1,0 +1,14 @@
+# Build / packaging artifacts (release workflow produces these)
+*.tar.gz
+*.tar.gz.sha256
+
+# Editor / OS scratch
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
+
+# Test scratch dirs occasionally left around during local poking
+/tmp/
+/build/

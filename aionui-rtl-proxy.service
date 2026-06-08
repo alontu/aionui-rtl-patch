@@ -1,0 +1,21 @@
+[Unit]
+Description=AionUi RTL Patch Proxy (HTML rewriter for Hebrew RTL)
+Documentation=https://github.com/iOfficeAI/AionUi
+After=aionui-webui.service
+Wants=aionui-webui.service
+
+[Service]
+Type=simple
+Environment=RTL_LISTEN_HOST=::
+Environment=RTL_LISTEN_PORT=@EXTERNAL_PORT@
+Environment=RTL_UPSTREAM_HOST=127.0.0.1
+Environment=RTL_UPSTREAM_PORT=@INTERNAL_PORT@
+Environment=RTL_ASSET_DIR=@INSTALL_DIR@
+ExecStart=@NODE_BIN@ @INSTALL_DIR@/proxy.js
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

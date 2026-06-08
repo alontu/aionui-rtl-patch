@@ -1,0 +1,45 @@
+/* aionui-rtl-patch v7 — content-driven bidi (light-DOM rules).
+   v6 adds blockquote logical-property fix for Hebrew quote rendering.
+   Edit this file freely; hard-reload the browser to apply (no service restart). */
+
+/* Heebo: Hebrew-first font for prose, ~50 KB on first load (cached). */
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap');
+
+[data-aionui-rtl] {
+  direction: revert !important;
+  text-align: start !important;
+  unicode-bidi: plaintext;
+}
+
+[data-aionui-rtl] {
+  direction: revert !important;
+  font-family: "Heebo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+[data-aionui-rtl] pre,
+[data-aionui-rtl] code,
+[data-aionui-rtl] kbd,
+[data-aionui-rtl] samp {
+  font-family: ui-monospace, "JetBrains Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+textarea, input[type="text"], input[type="search"],
+[contenteditable="true"], [role="textbox"] {
+  font-family: "Heebo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  unicode-bidi: plaintext;
+}
+textarea[dir="auto"], input[dir="auto"],
+[contenteditable="true"][dir="auto"], [role="textbox"][dir="auto"] {
+  text-align: start;
+}
+
+/* Quotes: zero physical left/right border+padding, re-add as logical
+   inline-start so the quote bar auto-flips to the right for RTL content. */
+blockquote[data-aionui-rtl] {
+  border-left-width: 0 !important;
+  border-right-width: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border-inline-start: 0.25em solid currentColor !important;
+  padding-inline-start: 1em !important;
+}

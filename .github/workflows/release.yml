@@ -1,0 +1,50 @@
+name: Release
+
+# Triggers when a tag matching v*.*.* is pushed.
+# Builds a flat tarball and attaches it to a GitHub Release.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build tarball
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          STAGE_PARENT="$(mktemp -d)"
+          STAGE="$STAGE_PARENT/aionui-rtl-patch"
+          mkdir -p "$STAGE"
+
+          # Copy every published artifact into a flat tarball that matches
+          # what users would clone from the repo root.
+          cp proxy.js rtl.css rtl.js \
+             install.sh uninstall.sh aionui-rtl-proxy.service \
+             README.md CHANGELOG.md LICENSE "$STAGE/"
+          chmod +x "$STAGE/install.sh" "$STAGE/uninstall.sh"
+          echo "$VERSION" > "$STAGE/VERSION"
+
+          cd "$STAGE_PARENT"
+          tar czf "aionui-rtl-patch-${VERSION}.tar.gz" aionui-rtl-patch/
+          sha256sum "aionui-rtl-patch-${VERSION}.tar.gz" \
+            > "aionui-rtl-patch-${VERSION}.tar.gz.sha256"
+          mv "aionui-rtl-patch-${VERSION}.tar.gz"* "$GITHUB_WORKSPACE/"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            aionui-rtl-patch-*.tar.gz
+            aionui-rtl-patch-*.tar.gz.sha256
+          generate_release_notes: true
+          body_path: CHANGELOG.md
