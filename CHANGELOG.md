@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## v1.0.3 (2026-07-08)
+
+- Fix: bullet points / sentences that **start with English** but contain mostly
+  Hebrew content now correctly render RTL. Previously, the first-strong-
+  character rule (mirroring HTML5 `dir="auto"` semantics) would pick LTR
+  because the leading word was English, causing the Hebrew runs inside the
+  same line to flow in visually-reversed reading order.
+- The direction detector now uses a **majority-of-strong-characters** rule:
+  the element resolves to RTL when Hebrew (or Arabic/Persian) strong
+  characters outnumber Latin strong characters, and LTR otherwise.
+- Handles all four cases correctly:
+  - Pure English bullets → LTR
+  - Pure Hebrew bullets → RTL
+  - Hebrew sentence with embedded English terms ("AI", "npm install", ...) → RTL
+  - English sentence with a Hebrew word or two ("The word 'שלום' means hello") → still LTR
+
 ## v1.0.2 (2026-06-07)
 
 - Hebrew blockquotes, numbered lists, and bullet lists now render with the

@@ -1,4 +1,4 @@
-/* aionui-rtl-patch v8 — content-driven bidi with JS-enforced direction.
+/* aionui-rtl-patch v9 — content-driven bidi with JS-enforced direction.
    v7's `direction: revert !important` lost to AionUi's author CSS rule(s) for
    blockquote/ul/ol. v8 sidesteps the CSS specificity war by computing
    direction in JS (first-strong-char per Unicode bidi) and applying it as an
@@ -47,15 +47,21 @@
   var observedShadows = new WeakSet();
   var styledShadows = new WeakSet();
 
-  // First-strong-character direction detection (mirrors HTML5 dir=auto semantics).
-  function detectStrongDir(text) {
+  // Dominant-direction detection: count strong RTL vs strong LTR chars and pick
+  // the majority. Replaces first-strong-character (HTML5 dir=auto) so that
+  // Hebrew sentences that happen to start with an English term ("AI is טוב for
+  // עבודה") correctly resolve to RTL — first-strong-char would have picked LTR
+  // and rendered the Hebrew runs in visually-reversed order inside an LTR line.
+  function detectDominantDir(text) {
     if (!text) return null;
+    var rtl = 0, ltr = 0;
     for (var i = 0; i < text.length; i++) {
       var ch = text.charAt(i);
-      if (STRONG_RTL_RE.test(ch)) return 'rtl';
-      if (STRONG_LTR_RE.test(ch)) return 'ltr';
+      if (STRONG_RTL_RE.test(ch)) rtl++;
+      else if (STRONG_LTR_RE.test(ch)) ltr++;
     }
-    return null;
+    if (rtl === 0 && ltr === 0) return null;
+    return rtl > ltr ? 'rtl' : 'ltr';
   }
 
   function isBlockLike(el) {
@@ -76,7 +82,7 @@
     // Compute desired direction from first strong char in textContent and
     // set it as inline !important so it beats any author CSS rule.
     if (!el || el.nodeType !== 1) return;
-    var dir = detectStrongDir(el.textContent || '');
+    var dir = detectDominantDir(el.textContent || '');
     if (!dir) return;
     try {
       el.style.setProperty('direction', dir, 'important');
@@ -241,7 +247,7 @@
   }
 
   function start() {
-    console.info('[aionui-rtl] v8 loaded — JS-enforced direction, walking');
+    console.info('[aionui-rtl] v9 loaded — majority-RTL detection, walking');
     drainPreCapturedQueue();
     var root = document.body || document.documentElement;
     walkRoot(root);
